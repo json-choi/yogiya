@@ -116,7 +116,7 @@ export default function ChatsScreen() {
   }
 
   return (
-    <View style={s.screen}>
+    <View testID="chats_screen" style={s.screen}>
       <View style={[s.header, { paddingTop: insets.top + 12 }]}>
         <View style={s.headerLeft}>
           <RNText style={s.headerTitle}>채팅</RNText>

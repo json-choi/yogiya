@@ -1,0 +1,15 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npx npm-check-updates:*)",
+      "Bash(bunx npm-check-updates:*)",
+      "WebFetch(domain:expo.dev)",
+      "WebSearch",
+      "WebFetch(domain:www.nativewind.dev)",
+      "WebFetch(domain:github.com)",
+      "Bash(grep -E \"\\\\.\\(js|json|ts|tsx|css\\)$|babel|metro|tailwind|tsconfig\")",
+      "WebFetch(domain:devblogs.microsoft.com)",
+      "Bash(npx expo:*)"
+    ]
+  }
+}

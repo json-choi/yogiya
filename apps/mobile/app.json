@@ -1,49 +1,50 @@
 {
-    "expo": {
-        "name": "Yogiya",
-        "slug": "yogiya",
-        "version": "1.0.0",
-        "scheme": "yogiya",
-        "orientation": "portrait",
-        "userInterfaceStyle": "automatic",
-        "icon": "./assets/icon.png",
-        "web": {
-            "bundler": "metro"
-        },
-        "ios": {
-            "supportsTablet": true,
-            "bundleIdentifier": "com.yogiya.app",
-            "infoPlist": {
-                "NSLocationWhenInUseUsageDescription": "방 멤버들과 위치를 공유하기 위해 필요합니다.",
-                "NSLocationAlwaysAndWhenInUseUsageDescription": "앱이 백그라운드에 있을 때도 방 멤버들에게 위치를 공유하기 위해 항상 허용이 필요합니다."
-            }
-        },
-        "android": {
-            "package": "com.yogiya.app",
-            "permissions": [
-                "ACCESS_COARSE_LOCATION",
-                "ACCESS_FINE_LOCATION",
-                "ACCESS_BACKGROUND_LOCATION",
-                "FOREGROUND_SERVICE",
-                "FOREGROUND_SERVICE_LOCATION"
-            ],
-            "config": {
-                "googleMaps": {
-                    "apiKey": "AIzaSyCcWoPZst7hjJrLpDuXWd8FPo7MvIoKMlU"
-                }
-            }
-        },
-        "plugins": [
-            [
-                "expo-location",
-                {
-                    "locationAlwaysAndWhenInUsePermission": "방 멤버들에게 위치를 공유하기 위해 위치 접근 권한이 필요합니다.",
-                    "locationWhenInUsePermission": "앱 사용 중 방 멤버들과 위치를 공유하기 위해 위치 접근 권한이 필요합니다.",
-                    "isIosBackgroundLocationEnabled": true,
-                    "isAndroidBackgroundLocationEnabled": true,
-                    "isAndroidForegroundServiceEnabled": true
-                }
-            ]
-        ]
-    }
+  "expo": {
+    "name": "Yogiya",
+    "slug": "yogiya",
+    "version": "1.0.0",
+    "scheme": "yogiya",
+    "orientation": "portrait",
+    "userInterfaceStyle": "automatic",
+    "icon": "./assets/icon.png",
+    "web": {
+      "bundler": "metro"
+    },
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.yogiya.app",
+      "infoPlist": {
+        "NSLocationWhenInUseUsageDescription": "방 멤버들과 위치를 공유하기 위해 필요합니다.",
+        "NSLocationAlwaysAndWhenInUseUsageDescription": "앱이 백그라운드에 있을 때도 방 멤버들에게 위치를 공유하기 위해 항상 허용이 필요합니다."
+      }
+    },
+    "android": {
+      "package": "com.yogiya.app",
+      "permissions": [
+        "ACCESS_COARSE_LOCATION",
+        "ACCESS_FINE_LOCATION",
+        "ACCESS_BACKGROUND_LOCATION",
+        "FOREGROUND_SERVICE",
+        "FOREGROUND_SERVICE_LOCATION"
+      ],
+      "config": {
+        "googleMaps": {
+          "apiKey": "AIzaSyCcWoPZst7hjJrLpDuXWd8FPo7MvIoKMlU"
+        }
+      }
+    },
+    "plugins": [
+      [
+        "expo-location",
+        {
+          "locationAlwaysAndWhenInUsePermission": "방 멤버들에게 위치를 공유하기 위해 위치 접근 권한이 필요합니다.",
+          "locationWhenInUsePermission": "앱 사용 중 방 멤버들과 위치를 공유하기 위해 위치 접근 권한이 필요합니다.",
+          "isIosBackgroundLocationEnabled": true,
+          "isAndroidBackgroundLocationEnabled": true,
+          "isAndroidForegroundServiceEnabled": true
+        }
+      ],
+      "expo-font"
+    ]
+  }
 }

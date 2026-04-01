@@ -137,6 +137,7 @@ export default function RoomScreen() {
     if (needsOnboarding) {
         return (
             <KeyboardAvoidingView
+                testID="room_join_screen"
                 className="flex-1 bg-background-0"
                 behavior={process.env.EXPO_OS === "ios" ? "padding" : undefined}
             >
@@ -161,6 +162,7 @@ export default function RoomScreen() {
 
                     <Input size="lg" variant="outline" className="w-full mb-2">
                         <InputField
+                            testID="room_name_input"
                             value={name}
                             onChangeText={setName}
                             placeholder="이름을 입력하세요"
@@ -171,6 +173,7 @@ export default function RoomScreen() {
                     </Input>
 
                     <Button
+                        testID="room_join_button"
                         size="xl"
                         className="w-full bg-secondary-500"
                         onPress={handleOnboard}

@@ -1,0 +1,35 @@
+appId: com.yogiya.app
+---
+# Tab Navigation Flow
+# Verifies that all tab screens are accessible
+
+- launchApp
+
+# Assume user is already onboarded (state persisted)
+# Map tab should be visible by default
+- assertVisible:
+    id: "map_screen"
+
+# Navigate to Friends tab
+- tapOn:
+    id: "tab_friends"
+- assertVisible:
+    id: "friends_screen"
+
+# Navigate to Chats tab
+- tapOn:
+    id: "tab_chats"
+- assertVisible:
+    id: "chats_screen"
+
+# Navigate to Profile tab
+- tapOn:
+    id: "tab_profile"
+- assertVisible:
+    id: "profile_screen"
+
+# Navigate back to Map tab
+- tapOn:
+    id: "tab_map"
+- assertVisible:
+    id: "map_screen"

@@ -1,0 +1,5 @@
+appId: com.yogiya.app
+tags:
+  - e2e
+onFlowStart:
+  - clearState

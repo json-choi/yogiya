@@ -39,7 +39,7 @@ export default function OnboardingScreen() {
   }
 
   return (
-    <ScrollView style={s.scroll} contentInsetAdjustmentBehavior="automatic" contentContainerStyle={s.content}>
+    <ScrollView testID="onboarding_screen" style={s.scroll} contentInsetAdjustmentBehavior="automatic" contentContainerStyle={s.content}>
       <View style={s.header}>
         <RNText style={s.title}>시작하기</RNText>
         <RNText style={s.subtitle}>캐릭터를 선택하고 이름을 입력해주세요</RNText>
@@ -48,6 +48,7 @@ export default function OnboardingScreen() {
       <View style={s.section}>
         <RNText style={s.label}>이름</RNText>
         <TextInput
+          testID="name_input"
           style={s.input}
           value={name}
           onChangeText={setName}
@@ -66,6 +67,7 @@ export default function OnboardingScreen() {
           {MALE_TYPES.map((type) => (
             <TouchableOpacity
               key={type}
+              testID={`character_${type}`}
               style={[s.characterCard, selectedCharacter === type && s.characterCardSelected]}
               onPress={() => setSelectedCharacter(type)}
               activeOpacity={0.7}
@@ -82,6 +84,7 @@ export default function OnboardingScreen() {
           {FEMALE_TYPES.map((type) => (
             <TouchableOpacity
               key={type}
+              testID={`character_${type}`}
               style={[s.characterCard, selectedCharacter === type && s.characterCardSelected]}
               onPress={() => setSelectedCharacter(type)}
               activeOpacity={0.7}
@@ -101,6 +104,7 @@ export default function OnboardingScreen() {
       </View>
 
       <TouchableOpacity
+        testID="start_button"
         style={[s.button, (!name.trim() || isLoading) && s.buttonDisabled]}
         onPress={handleStart}
         disabled={!name.trim() || isLoading}

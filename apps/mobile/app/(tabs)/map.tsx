@@ -299,7 +299,7 @@ export default function MapScreen() {
     }));
 
     return (
-        <GestureHandlerRootView style={{ flex: 1, backgroundColor: '#09090B' }}>
+        <GestureHandlerRootView testID="map_screen" style={{ flex: 1, backgroundColor: '#09090B' }}>
             <MapView
                 ref={mapRef}
                 style={{ flex: 1 }}

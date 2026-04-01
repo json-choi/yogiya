@@ -57,7 +57,7 @@ export default function ProfileScreen() {
   }
 
   return (
-    <ScrollView style={s.screen} contentInsetAdjustmentBehavior="automatic" contentContainerStyle={{ paddingBottom: 48 }}>
+    <ScrollView testID="profile_screen" style={s.screen} contentInsetAdjustmentBehavior="automatic" contentContainerStyle={{ paddingBottom: 48 }}>
       <View style={[s.pageHeader, { paddingTop: insets.top + 12 }]}>
         <RNText style={s.pageTitle}>내 정보</RNText>
       </View>

@@ -91,7 +91,7 @@ export default function FriendsScreen() {
   }
 
   return (
-    <View style={s.screen}>
+    <View testID="friends_screen" style={s.screen}>
       <View style={[s.header, { paddingTop: insets.top + 12 }]}>
         <View style={s.headerLeft}>
           <RNText style={s.headerTitle}>친구</RNText>

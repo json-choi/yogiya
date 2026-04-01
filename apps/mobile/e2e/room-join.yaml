@@ -1,0 +1,26 @@
+appId: com.yogiya.app
+---
+# Room Join Flow
+# Verifies that a user can join a room via deep link
+
+- launchApp:
+    arguments:
+      url: "yogiya://room/ABC123"
+
+# Room join screen should appear
+- assertVisible:
+    id: "room_join_screen"
+
+# Enter name for room
+- tapOn:
+    id: "room_name_input"
+- inputText: "방테스트유저"
+
+# Tap join button
+- tapOn:
+    id: "room_join_button"
+
+# Should show the map with room info
+- assertVisible:
+    id: "map_screen"
+    timeout: 5000

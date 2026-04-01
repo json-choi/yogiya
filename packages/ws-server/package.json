@@ -6,12 +6,12 @@
     "start": "bun run src/index.ts"
   },
   "dependencies": {
-    "@elysiajs/cors": "^1.2.2",
+    "@elysiajs/cors": "^1.4.1",
     "@yogiya/db": "workspace:*",
     "@yogiya/shared": "workspace:*",
-    "@sinclair/typebox": "^0.34.0",
-    "drizzle-orm": "^0.45.1",
-    "elysia": "^1.4.25"
+    "@sinclair/typebox": "^0.34.49",
+    "drizzle-orm": "^0.45.2",
+    "elysia": "^1.4.28"
   },
   "devDependencies": {
     "@types/bun": "latest"

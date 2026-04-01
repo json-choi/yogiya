@@ -17,6 +17,7 @@ export default function TabsLayout() {
         name="map"
         options={{
           title: '지도',
+          tabBarTestID: 'tab_map',
           tabBarIcon: ({ color, size }) => (
             <Map size={size - 2} color={color} strokeWidth={1.75} />
           ),
@@ -26,6 +27,7 @@ export default function TabsLayout() {
         name="friends"
         options={{
           title: '친구',
+          tabBarTestID: 'tab_friends',
           tabBarIcon: ({ color, size }) => (
             <Users size={size - 2} color={color} strokeWidth={1.75} />
           ),
@@ -35,6 +37,7 @@ export default function TabsLayout() {
         name="chats"
         options={{
           title: '채팅',
+          tabBarTestID: 'tab_chats',
           tabBarIcon: ({ color, size }) => (
             <MessageSquare size={size - 2} color={color} strokeWidth={1.75} />
           ),
@@ -44,6 +47,7 @@ export default function TabsLayout() {
         name="profile"
         options={{
           title: '내정보',
+          tabBarTestID: 'tab_profile',
           tabBarIcon: ({ color, size }) => (
             <User size={size - 2} color={color} strokeWidth={1.75} />
           ),

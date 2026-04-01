@@ -1,0 +1,27 @@
+appId: com.yogiya.app
+---
+# Onboarding Flow
+# Verifies that a new user can complete the onboarding process
+
+- launchApp
+
+# Onboarding screen should appear for first-time users
+- assertVisible:
+    id: "onboarding_screen"
+
+# Enter name
+- tapOn:
+    id: "name_input"
+- inputText: "테스트유저"
+
+# Select character
+- tapOn:
+    id: "character_boy_casual"
+
+# Tap start button
+- tapOn:
+    id: "start_button"
+
+# Should navigate to map tab
+- assertVisible:
+    id: "map_screen"
