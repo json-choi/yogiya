@@ -18,6 +18,7 @@ export type WSMessage =
           accuracy?: number;
           speed?: number;
           timestamp: number;
+          direction?: CharacterDirection;
       }
     | { type: "chat"; from: string; to: string; content: string; timestamp: number }
     | { type: "group_chat"; from: string; groupId: string; content: string; timestamp: number }
@@ -216,6 +217,19 @@ export interface RoomMessage {
     type: MessageType;
     createdAt: string;
     sender?: User;
+}
+
+// 8방향 캐릭터 방향 계산
+export function calcDirection(dx: number, dy: number): CharacterDirection {
+    const angle = Math.atan2(dy, dx) * (180 / Math.PI);
+    if (angle >= 67.5 && angle < 112.5) return "north";
+    if (angle >= 22.5 && angle < 67.5) return "north-east";
+    if (angle >= -22.5 && angle < 22.5) return "east";
+    if (angle >= -67.5 && angle < -22.5) return "south-east";
+    if (angle >= -112.5 && angle < -67.5) return "south";
+    if (angle >= -157.5 && angle < -112.5) return "south-west";
+    if (angle >= 112.5 && angle < 157.5) return "north-west";
+    return "west";
 }
 
 // ETA 계산용 유틸리티

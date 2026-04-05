@@ -30,6 +30,8 @@ export default function MapScreen() {
         joinRoom,
         leaveRoom,
         sendRoomChat,
+        sendSetDestination,
+        clearMessages,
     } = useWebSocket();
     const { currentLocation, isTracking, startRoomTracking, stopRoomTracking } = useLocation();
 
@@ -42,6 +44,7 @@ export default function MapScreen() {
     const mapRef = useRef<MapView>(null);
     const prevLocationRef = useRef<{ lat: number; lng: number } | null>(null);
     const myDirectionRef = useRef<import("@yogiya/shared").CharacterDirection>("south");
+    const isArrivalAlertShownRef = useRef(false);
 
 
 
@@ -99,39 +102,65 @@ export default function MapScreen() {
             .filter((m): m is NonNullable<typeof m> => m !== null);
     }, [roomInfo, friendLocations, user?.id]);
 
+    const handleLeaveRoom = useCallback(async () => {
+        if (!currentRoom || !user) return;
+        await stopRoomTracking();
+        try {
+            await fetch(`${API_URL}/api/rooms/${currentRoom.code}/leave`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ userId: user.id }),
+            });
+        } catch (error) {
+            console.error('Failed to leave room:', error);
+        }
+        leaveRoom(user.id, currentRoom.code);
+        clearMessages();
+        setCurrentRoom(null);
+        isArrivalAlertShownRef.current = false;
+    }, [currentRoom, user, stopRoomTracking, leaveRoom, clearMessages, setCurrentRoom]);
+
+    const ARRIVAL_RADIUS_METERS = 50;
+
     useEffect(() => {
         if (!currentRoom || !currentLocation || !roomInfo) return;
-        const members = roomInfo.members.filter((m) => m.userId !== user?.id);
-        if (members.length === 0) return;
+        if (!roomInfo.destinationLat || !roomInfo.destinationLng) return;
+        if (isArrivalAlertShownRef.current) return;
 
-        const myLat = currentLocation.coords.latitude;
-        const myLng = currentLocation.coords.longitude;
+        const destLat = roomInfo.destinationLat;
+        const destLng = roomInfo.destinationLng;
 
-        const allMet = members.every((member) => {
+        // 내가 목적지 반경 내인지
+        const myDist = calculateDistance(
+            currentLocation.coords.latitude,
+            currentLocation.coords.longitude,
+            destLat, destLng,
+        ) * 1000;
+        if (myDist > ARRIVAL_RADIUS_METERS) return;
+
+        // 다른 멤버들이 모두 목적지 반경 내인지
+        const otherMembers = roomInfo.members.filter((m) => m.userId !== user?.id);
+        if (otherMembers.length === 0) return;
+
+        const allArrived = otherMembers.every((member) => {
             const loc = friendLocations[member.userId];
             if (!loc) return false;
-            return calculateDistance(myLat, myLng, loc.lat, loc.lng) * 1000 <= 1;
+            const dist = calculateDistance(loc.lat, loc.lng, destLat, destLng) * 1000;
+            return dist <= ARRIVAL_RADIUS_METERS;
         });
 
-        if (allMet) {
-            Alert.alert('🎉 만났어요!', '모든 멤버가 같은 위치에 모였습니다. 위치 공유를 종료합니다.', [
-                {
-                    text: '확인',
-                    onPress: async () => {
-                        try {
-                            await fetch(`${API_URL}/api/rooms/${currentRoom.code}/leave`, {
-                                method: 'POST',
-                                headers: { 'Content-Type': 'application/json' },
-                                body: JSON.stringify({ userId: user!.id }),
-                            });
-                        } catch {}
-                        leaveRoom(user!.id, currentRoom.code);
-                        setCurrentRoom(null);
-                    },
-                },
-            ]);
+        if (allArrived) {
+            isArrivalAlertShownRef.current = true;
+            Alert.alert(
+                '🎉 모두 도착했어요!',
+                '모든 멤버가 목표지점에 도착했습니다.',
+                [
+                    { text: '계속 공유', style: 'cancel' },
+                    { text: '위치 공유 종료', style: 'destructive', onPress: handleLeaveRoom },
+                ],
+            );
         }
-    }, [currentLocation, friendLocations]);
+    }, [currentLocation, friendLocations, roomInfo, currentRoom, user, handleLeaveRoom]);
 
     const getMemberName = useCallback(
         (senderId: string) => {
@@ -225,34 +254,18 @@ export default function MapScreen() {
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ lat, lng, name: "목표지점" }),
             });
+            sendSetDestination(currentRoom.code, lat, lng, "목표지점");
         } catch (error) {
             console.error("Failed to set destination:", error);
             Alert.alert("오류", "목표지점 설정에 실패했습니다.");
         }
     };
 
-    const leaveCurrentRoom = async () => {
+    const leaveCurrentRoom = () => {
         if (!currentRoom || !user) return;
-
         Alert.alert("방 나가기", "정말 방을 나가시겠어요?", [
             { text: "취소", style: "cancel" },
-            {
-                text: "나가기",
-                style: "destructive",
-                onPress: async () => {
-                    try {
-                        await fetch(`${API_URL}/api/rooms/${currentRoom.code}/leave`, {
-                            method: "POST",
-                            headers: { "Content-Type": "application/json" },
-                            body: JSON.stringify({ userId: user.id }),
-                        });
-                    } catch (error) {
-                        console.error("Failed to leave room:", error);
-                    }
-                    leaveRoom(user.id, currentRoom.code);
-                    setCurrentRoom(null);
-                },
-            },
+            { text: "나가기", style: "destructive", onPress: handleLeaveRoom },
         ]);
     };
 
@@ -265,6 +278,7 @@ export default function MapScreen() {
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ lat: null, lng: null, name: null }),
             });
+            sendSetDestination(currentRoom.code, 0, 0, "__clear__");
         } catch (error) {
             console.error("Failed to clear destination:", error);
         }

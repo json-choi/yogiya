@@ -25,6 +25,7 @@ interface WebSocketContextType {
     sendLocation: (lat: number, lng: number, accuracy?: number, speed?: number) => void;
     sendRoomChat: (roomCode: string, content: string) => void;
     sendChat: (to: string, content: string) => void;
+    sendSetDestination: (roomCode: string, lat: number, lng: number, name?: string) => void;
     clearMessages: () => void;
 }
 
@@ -65,12 +66,16 @@ export function WebSocketProvider({ children }: { children: React.ReactNode }) {
                     let direction = prevLoc?.direction || "south";
                     let isMoving = false;
 
-                    if (prevLoc) {
+                    // 서버가 direction을 보내면 우선 사용
+                    if ("direction" in msg && msg.direction) {
+                        direction = msg.direction;
+                        isMoving = true;
+                    } else if (prevLoc) {
                         const dx = msg.lng - prevLoc.lng;
                         const dy = msg.lat - prevLoc.lat;
                         const distance = Math.sqrt(dx * dx + dy * dy);
 
-                        if (distance > 0.00001) {
+                        if (distance > 0.000005) {
                             isMoving = true;
                             direction = calcDirection(dx, dy);
                         }
@@ -261,6 +266,14 @@ export function WebSocketProvider({ children }: { children: React.ReactNode }) {
         }
     }, []);
 
+    const sendSetDestination = useCallback((roomCode: string, lat: number, lng: number, name?: string) => {
+        if (wsRef.current?.readyState === WebSocket.OPEN) {
+            wsRef.current.send(
+                JSON.stringify({ type: "set_destination", roomCode, lat, lng, name }),
+            );
+        }
+    }, []);
+
     const clearMessages = useCallback(() => {
         setRoomMessages([]);
     }, []);
@@ -287,6 +300,7 @@ export function WebSocketProvider({ children }: { children: React.ReactNode }) {
                 sendLocation,
                 sendRoomChat,
                 sendChat,
+                sendSetDestination,
                 clearMessages,
             }}
         >

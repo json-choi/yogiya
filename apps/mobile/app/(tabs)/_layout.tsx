@@ -18,40 +18,40 @@ export default function TabsLayout() {
         options={{
           title: '지도',
           tabBarTestID: 'tab_map',
-          tabBarIcon: ({ color, size }) => (
+          tabBarIcon: ({ color, size }: { color: string; size: number }) => (
             <Map size={size - 2} color={color} strokeWidth={1.75} />
           ),
-        }}
+        } as any}
       />
       <Tabs.Screen
         name="friends"
         options={{
           title: '친구',
           tabBarTestID: 'tab_friends',
-          tabBarIcon: ({ color, size }) => (
+          tabBarIcon: ({ color, size }: { color: string; size: number }) => (
             <Users size={size - 2} color={color} strokeWidth={1.75} />
           ),
-        }}
+        } as any}
       />
       <Tabs.Screen
         name="chats"
         options={{
           title: '채팅',
           tabBarTestID: 'tab_chats',
-          tabBarIcon: ({ color, size }) => (
+          tabBarIcon: ({ color, size }: { color: string; size: number }) => (
             <MessageSquare size={size - 2} color={color} strokeWidth={1.75} />
           ),
-        }}
+        } as any}
       />
       <Tabs.Screen
         name="profile"
         options={{
           title: '내정보',
           tabBarTestID: 'tab_profile',
-          tabBarIcon: ({ color, size }) => (
+          tabBarIcon: ({ color, size }: { color: string; size: number }) => (
             <User size={size - 2} color={color} strokeWidth={1.75} />
           ),
-        }}
+        } as any}
       />
     </Tabs>
   )

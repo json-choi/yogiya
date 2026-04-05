@@ -2,6 +2,7 @@ import { Elysia, t } from "elysia";
 import { cors } from "@elysiajs/cors";
 import { db, rooms as roomsTable, roomMembers, roomMessages, users } from "@yogiya/db";
 import { eq, and, isNull } from "drizzle-orm";
+import { calcDirection, type CharacterDirection } from "@yogiya/shared";
 
 // 클라이언트 정보 타입
 interface ClientInfo {
@@ -16,6 +17,9 @@ const clients = new Map<string, ClientInfo>();
 
 // 룸별 클라이언트 관리
 const rooms = new Map<string, Set<string>>(); // roomCode -> Set of ws.id
+
+// 유저별 마지막 위치 (direction 계산용)
+const lastLocations = new Map<string, { lat: number; lng: number }>();
 
 // 메시지 타입
 type WSMessage =
@@ -42,14 +46,20 @@ const app = new Elysia()
     }))
     .post(
         "/location",
-        ({ body }) => {
+        ({ body, set }) => {
             const { userId, roomCode, lat, lng, accuracy, speed } = body;
+
+            if (!rooms.has(roomCode)) {
+                set.status = 404;
+                return { ok: false, error: "room not found" };
+            }
 
             const client = [...clients.values()].find((c) => c.userId === userId);
             if (client && !client.roomCode) {
                 client.roomCode = roomCode;
             }
 
+            const direction = computeDirection(userId, lat, lng);
             broadcastToRoom(roomCode, {
                 type: "room_location_update",
                 userId,
@@ -58,6 +68,7 @@ const app = new Elysia()
                 accuracy,
                 speed,
                 timestamp: Date.now(),
+                direction,
             });
 
             return { ok: true };
@@ -231,6 +242,18 @@ function handleLeaveRoom(ws: any, msg: { type: "leave_room"; userId: string; roo
     console.log(`User ${msg.userId} left room ${msg.roomCode}`);
 }
 
+function computeDirection(userId: string, lat: number, lng: number): CharacterDirection | undefined {
+    const prev = lastLocations.get(userId);
+    lastLocations.set(userId, { lat, lng });
+    if (!prev) return undefined;
+    const dx = lng - prev.lng;
+    const dy = lat - prev.lat;
+    if (Math.sqrt(dx * dx + dy * dy) > 0.000005) {
+        return calcDirection(dx, dy);
+    }
+    return undefined;
+}
+
 function handleLocationUpdate(
     ws: any,
     msg: {
@@ -253,6 +276,7 @@ function handleLocationUpdate(
 
         // 룸에 있으면 룸 멤버들에게 위치 브로드캐스트
         if (client.roomCode) {
+            const direction = computeDirection(msg.userId, msg.lat, msg.lng);
             broadcastToRoom(
                 client.roomCode,
                 {
@@ -263,6 +287,7 @@ function handleLocationUpdate(
                     accuracy: msg.accuracy,
                     speed: msg.speed,
                     timestamp: Date.now(),
+                    direction,
                 },
                 ws.id,
             );
@@ -303,17 +328,22 @@ async function handleSetDestination(
     ws: any,
     msg: { type: "set_destination"; roomCode: string; lat: number; lng: number; name?: string },
 ) {
+    const isClear = msg.name === "__clear__";
     await db
         .update(roomsTable)
-        .set({ destinationLat: msg.lat, destinationLng: msg.lng, destinationName: msg.name })
+        .set({
+            destinationLat: isClear ? null : msg.lat,
+            destinationLng: isClear ? null : msg.lng,
+            destinationName: isClear ? null : msg.name,
+        })
         .where(eq(roomsTable.code, msg.roomCode));
 
     broadcastToRoom(msg.roomCode, {
         type: "destination_updated",
         roomCode: msg.roomCode,
-        lat: msg.lat,
-        lng: msg.lng,
-        name: msg.name,
+        lat: isClear ? null : msg.lat,
+        lng: isClear ? null : msg.lng,
+        name: isClear ? null : msg.name,
     });
 }
 

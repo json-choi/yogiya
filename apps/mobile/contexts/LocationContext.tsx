@@ -47,20 +47,29 @@ TaskManager.defineTask(LOCATION_TASK_NAME, async ({ data, error }: any) => {
       .replace(/^ws:\/\//, 'http://')
       .replace(/\/ws$/, '')
 
-    await fetch(`${baseUrl}/location`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        userId,
-        roomCode,
-        lat: location.coords.latitude,
-        lng: location.coords.longitude,
-        accuracy: location.coords.accuracy ?? undefined,
-        speed: location.coords.speed ?? undefined,
-      }),
+    const payload = JSON.stringify({
+      userId,
+      roomCode,
+      lat: location.coords.latitude,
+      lng: location.coords.longitude,
+      accuracy: location.coords.accuracy ?? undefined,
+      speed: location.coords.speed ?? undefined,
     })
+
+    for (let attempt = 0; attempt < 3; attempt++) {
+      try {
+        await fetch(`${baseUrl}/location`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: payload,
+        })
+        break
+      } catch (e) {
+        if (attempt === 2) console.error('Background location send failed after 3 attempts:', e)
+      }
+    }
   } catch (e) {
-    console.error('Background location send failed:', e)
+    console.error('Background location task failed:', e)
   }
 })
 
@@ -118,11 +127,18 @@ export function LocationProvider({ children }: { children: React.ReactNode }) {
     const hasPermission = await requestPermission()
     if (!hasPermission) return
 
+    // 기존 태스크가 실행 중이면 먼저 중지
+    foregroundSubRef.current?.remove()
+    foregroundSubRef.current = null
+    const wasRunning = await Location.hasStartedLocationUpdatesAsync(LOCATION_TASK_NAME).catch(() => false)
+    if (wasRunning) {
+      await Location.stopLocationUpdatesAsync(LOCATION_TASK_NAME)
+    }
+
     localStorage.setItem(BG_WS_URL_KEY, WS_URL)
     localStorage.setItem(BG_USER_ID_KEY, user.id)
     localStorage.setItem(BG_ROOM_CODE_KEY, roomCode)
 
-    foregroundSubRef.current?.remove()
     foregroundSubRef.current = await Location.watchPositionAsync(
       {
         accuracy: Location.Accuracy.High,
@@ -140,23 +156,20 @@ export function LocationProvider({ children }: { children: React.ReactNode }) {
       },
     )
 
-    const isRunning = await Location.hasStartedLocationUpdatesAsync(LOCATION_TASK_NAME).catch(() => false)
-    if (!isRunning) {
-      await Location.startLocationUpdatesAsync(LOCATION_TASK_NAME, {
-        accuracy: Location.Accuracy.High,
-        timeInterval: 10000,
-        distanceInterval: 5,
-        foregroundService: {
-          notificationTitle: 'Location Messenger - 위치 공유 중',
-          notificationBody: '방 멤버들에게 위치를 공유하고 있습니다. 탭하여 앱으로 이동.',
-          notificationColor: '#00A5CF',
-          killServiceOnDestroy: false,
-        },
-        pausesUpdatesAutomatically: false,
-        activityType: Location.ActivityType.Fitness,
-        showsBackgroundLocationIndicator: true,
-      })
-    }
+    await Location.startLocationUpdatesAsync(LOCATION_TASK_NAME, {
+      accuracy: Location.Accuracy.High,
+      timeInterval: 10000,
+      distanceInterval: 5,
+      foregroundService: {
+        notificationTitle: 'Location Messenger - 위치 공유 중',
+        notificationBody: '방 멤버들에게 위치를 공유하고 있습니다. 탭하여 앱으로 이동.',
+        notificationColor: '#00A5CF',
+        killServiceOnDestroy: false,
+      },
+      pausesUpdatesAutomatically: false,
+      activityType: Location.ActivityType.Fitness,
+      showsBackgroundLocationIndicator: true,
+    })
 
     setIsTracking(true)
   }, [user, requestPermission, sendLocation])
